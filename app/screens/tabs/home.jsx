@@ -1,74 +1,41 @@
 import { StyleSheet, Text, View, FlatList, Image, ImageBackground, TouchableOpacity } from 'react-native'
 import { useRouter } from "expo-router";
+import country from '../../country.js';
+import { Link } from 'expo-router';
 
 export default function HomeScreen() {
   const router = useRouter()
-  const DATA = [
-    {
-      id: 1,
-      image: require("../../../assets/images/barcelona.png"),
-      country: "🇪🇸",
-      title: "Barcelona",
-      date: "maart 2024 - april 2024"
-    },
-    {
-      id: 2,
-      image: require("../../../assets/images/newyork.png"),
-      country: "🇺🇸",
-      title: "New York",
-      date: "maart 2024 - april 2024"
-    },
-    {
-      id: 3,
-      image: require("../../../assets/images/tokyo.png"),
-      country: "🇯🇵",
-      title: "Tokyo",
-      date: "september 2023 - december 2023"
-    },
-    {
-      id: 4,
-      image: require("../../../assets/images/rome.png"),
-      country: "🇮🇹",
-      title: "Rome",
-      date: "januari 2023 - februari 2023"
-    },
-    {
-      id: 5,
-      image: require("../../../assets/images/chongqing.png"),
-      country: "🇨🇳",
-      title: "Chongqing",
-      date: "januari 2023 - februari 2023"
-    },
-  ]
   return (
     <View style={styles.container}>
       <Text style={styles.text}>🏖️  My Trips</Text>
       <View style={styles.margin}>
         <FlatList
-          data={DATA}
+          data={country}
           keyExtractor={item => item.id}
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => router.push("/screens/tabs/add")}>
-              <View style={styles.fullCard}>
-                <View style={styles.card}>
-                  <ImageBackground source={item.image}
-                    style={styles.cardMage}
-                    imageStyle={styles.cardMage}>
-                    <View style={styles.overlay}>
-                      <View style={styles.countryInfo}>
-                        <Text style={styles.textFlag}>{item.country}</Text>
-                        <Text style={styles.textCard}>{item.title}</Text>
+            <Link href={`/screens/DetailScreen?id=${item.id}`} asChild>
+              <TouchableOpacity>
+                <View style={styles.fullCard}>
+                  <View style={styles.card}>
+                    <ImageBackground source={item.image}
+                      style={styles.cardMage}
+                      imageStyle={styles.cardMage}>
+                      <View style={styles.overlay}>
+                        <View style={styles.countryInfo}>
+                          <Text style={styles.textFlag}>{item.country}</Text>
+                          <Text style={styles.textCard}>{item.title}</Text>
+                        </View>
                       </View>
-                    </View>
-                  </ImageBackground>
+                    </ImageBackground>
+                  </View>
+                  <View style={styles.countryDate}>
+                    <Image source={require("../../../assets/images/stopwatch.png")}
+                      resizeMode="cover" />
+                    <Text style={styles.date}>{item.date}</Text>
+                  </View>
                 </View>
-                <View style={styles.countryDate}>
-                  <Image source={require("../../../assets/images/stopwatch.png")}
-                    resizeMode="cover" />
-                  <Text style={styles.date}>{item.date}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </Link>
           )}
         />
       </View>

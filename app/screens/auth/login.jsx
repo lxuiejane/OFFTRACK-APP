@@ -1,34 +1,40 @@
 import { StyleSheet, Text, View, ImageBackground, TextInput, TouchableOpacity, SafeAreaView, Image, Alert } from "react-native";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Login() {
     const router = useRouter();
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    // Email validation function
-    const isValidEmail = (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
+    async function loginUser(email, password) {
+        const storedProfile = await AsyncStorage.getItem("userProfile");
+        if (!storedProfile) {
+            throw new Error("No local user found. Please register first.");
+        }
+        const localUser = JSON.parse(storedProfile);
+        if (localUser.email === email && localUser.password === password) {
+            return { message: "Logged in." };
 
-    const handleLogin = () => {
-        if (!email.trim()) {
-            Alert.alert("Email Required", "Please enter your email.");
-            return;
+        } else {
+            throw new Error("Invalid Credentials");
         }
-        if (!isValidEmail(email)) {
-            Alert.alert("Invalid Email", "Please enter a valid email address.");
-            return;
-        }
-        if (!password.trim()) {
-            Alert.alert("Password Required", "Please enter your password.");
-            return;
-        }
+    }
 
-        // If all checks pass, navigate to home
-        router.replace("/screens/tabs/home");
+    const handleLogin = async () => {
+        if (!email.trim() || !password.trim()) {
+            Alert.alert("Error", "Please fill in all fields.");
+            return;
+        }
+        try {
+            const result = await loginUser(email, password);
+            Alert.alert("Success", result.message);
+            router.push("/screens/tabs/home");
+        } catch (error) {
+            Alert.alert("Login Error", error.message);
+        }
     };
 
     return (
@@ -49,7 +55,6 @@ export default function Login() {
                         placeholderTextColor="black"
                         onChangeText={setEmail}
                         value={email}
-                        keyboardType="email-address"
                         autoCapitalize="none"
                     />
                     <TextInput
@@ -58,11 +63,12 @@ export default function Login() {
                         placeholderTextColor="black"
                         onChangeText={setPassword}
                         value={password}
-                        secureTextEntry
+                        secureTextEntry={true}
                     />
                     <TouchableOpacity style={styles.button} onPress={handleLogin}>
                         <Text style={styles.buttonText}>LOGIN</Text>
                     </TouchableOpacity>
+
                     <Text onPress={() => router.push("/screens/auth/register")} style={styles.text}>
                         Don't have an account? Sign up
                     </Text>
@@ -96,7 +102,7 @@ const styles = StyleSheet.create({
         color: 'white'
     },
     textInput: {
-        backgroundColor: 'rgba(255, 255, 255, 0.83)', 
+        backgroundColor: 'rgba(255, 255, 255, 0.83)',
         borderRadius: 100,
         width: 350,
         padding: 15,

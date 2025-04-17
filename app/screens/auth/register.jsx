@@ -1,34 +1,32 @@
 import { StyleSheet, Text, View, ImageBackground, TextInput, TouchableOpacity, SafeAreaView, Image, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function Register() {
-
+export default function Login() {
     const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
 
-    const isValidEmail = (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
-
-    const handleRegister = () => {
-        if (!isValidEmail(email)) {
-            Alert.alert("Invalid Email", "Please enter a valid email address.");
-            return;
-        }
-        if (!password || !confirmPassword) {
-            Alert.alert("Password Required", "Please enter and confirm your password.");
+    async function registerUser(email, password) {
+        const userProfile = { email, password };
+        await AsyncStorage.setItem("userProfile", JSON.stringify(userProfile));
+    }
+    const handleRegister = async () => {
+        if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
+            Alert.alert("Error", "Please fill in all fields.");
             return;
         }
         if (password !== confirmPassword) {
-            Alert.alert("Passwords Do Not Match", "Ensure both password fields match.");
+            Alert.alert("Error", "Passwords do not match.");
             return;
         }
-        
-        router.replace("/screens/tabs/home");
+        else {
+            const result = await registerUser(email, password);
+            Alert.alert("Success", "Registered successfully");
+            router.push("/screens/auth/login");
+        }
     };
 
     return (
@@ -49,7 +47,6 @@ export default function Register() {
                         placeholderTextColor="black"
                         onChangeText={setEmail}
                         value={email}
-                        keyboardType="email-address"
                         autoCapitalize="none"
                     />
                     <TextInput
@@ -58,7 +55,7 @@ export default function Register() {
                         placeholderTextColor="black"
                         onChangeText={setPassword}
                         value={password}
-                        secureTextEntry
+                        secureTextEntry={true}
                     />
                     <TextInput
                         style={styles.textInput}
@@ -66,11 +63,12 @@ export default function Register() {
                         placeholderTextColor="black"
                         onChangeText={setConfirmPassword}
                         value={confirmPassword}
-                        secureTextEntry
+                        secureTextEntry={true}
                     />
                     <TouchableOpacity style={styles.button} onPress={handleRegister}>
                         <Text style={styles.buttonText}>CREATE ACCOUNT</Text>
                     </TouchableOpacity>
+
                     <Text onPress={() => router.push("/screens/auth/login")} style={styles.text}>
                         Already have an account? Sign in
                     </Text>
@@ -102,7 +100,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     textInput: {
-        backgroundColor: 'rgba(255, 255, 255, 0.83)', 
+        backgroundColor: 'rgba(255, 255, 255, 0.83)',
         borderRadius: 100,
         width: 350,
         padding: 15,
